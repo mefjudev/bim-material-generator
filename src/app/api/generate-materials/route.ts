@@ -199,15 +199,15 @@ export async function POST(request: NextRequest) {
     console.log('✅ Real UK suppliers added');
     return NextResponse.json({ materials: materialsWithSuppliers });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error generating materials:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('Error details:', error?.message);
+    console.error('Error stack:', error?.stack);
     return NextResponse.json(
       { 
         error: 'Failed to generate materials',
-        details: error.message,
-        type: error.constructor.name
+        details: error?.message || 'Unknown error',
+        type: error?.constructor?.name || 'Error'
       },
       { status: 500 }
     );
