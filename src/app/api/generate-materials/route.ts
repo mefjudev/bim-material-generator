@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     
     // Add real UK suppliers to each material
     console.log('🔍 Adding real UK suppliers...');
-    const materialsWithSuppliers = materials.map((material, index) => {
+    const materialsWithSuppliers = materials.map((material: any, index: number) => {
       const suppliers = [
         { name: 'Travis Perkins', contact: '0345 0268 268' },
         { name: 'Jewson', contact: '0800 539 766' },
