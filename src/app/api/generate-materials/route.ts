@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Real UK suppliers added');
     return NextResponse.json({ materials: materialsWithSuppliers });
 
-  } catch (error: any) {
+  } catch (error: Error) {
     console.error('❌ Error generating materials:', error);
     console.error('Error details:', error?.message);
     console.error('Error stack:', error?.stack);
