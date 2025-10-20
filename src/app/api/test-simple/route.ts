@@ -30,16 +30,33 @@ export async function POST() {
       message: response.choices[0]?.message?.content 
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Test failed:', error);
-    console.error('Error message:', error.message);
-    console.error('Error type:', error.constructor.name);
-    
+
+    let message = 'Unknown error';
+    let type = 'Error';
+    let stack = undefined;
+
+    if (error instanceof Error) {
+      message = error.message;
+      type = error.constructor?.name || 'Error';
+      stack = error.stack;
+      console.error('Error message:', error.message);
+      console.error('Error type:', error.constructor?.name);
+      console.error('Error stack:', error.stack);
+    } else {
+      try {
+        console.error('Error message:', JSON.stringify(error));
+      } catch {
+        console.error('Error message: (unserializable)');
+      }
+    }
+
     return NextResponse.json({
       error: 'Test failed',
-      message: error.message,
-      type: error.constructor.name,
-      stack: error.stack
+      message,
+      type,
+      stack
     }, { status: 500 });
   }
 }
