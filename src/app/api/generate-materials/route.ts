@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { BIMItem } from '@/types/bim';
 
 export async function POST(request: NextRequest) {
   try {
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
     
     // Add real UK suppliers to each material
     console.log('🔍 Adding real UK suppliers...');
-    const materialsWithSuppliers = materials.map((material: any, index: number) => {
+    const materialsWithSuppliers = materials.map((material: BIMItem, index: number) => {
       const suppliers = [
         { name: 'Travis Perkins', contact: '0345 0268 268' },
         { name: 'Jewson', contact: '0800 539 766' },
