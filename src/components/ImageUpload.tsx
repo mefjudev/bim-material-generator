@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { compressImage } from '@/utils/imageCompressor';
 
 interface ImageUploadProps {
@@ -95,11 +95,7 @@ export default function ImageUpload({ onImageSelect, selectedImage, onRemoveImag
           onDrop={handleDrop}
           onClick={handleClick}
         >
-          {selectedImage && (selectedImage.size > 0) ? (
-            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          ) : (
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          )}
+          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-lg font-medium text-gray-700 mb-2">
             Upload an image
           </p>
