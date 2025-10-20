@@ -10,19 +10,21 @@ interface BIMScheduleProps {
 
 export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) {
   const exportToCSV = () => {
-    const headers = ['Code', 'Location', 'Finish', 'Supplier', 'Contact Info', 'Price per sqm (Low)', 'Price per sqm (Mid)', 'Price per sqm (High)', 'Type'];
+    const headers = [
+      'Code', 'Area', 'Location of Finish', 'Finish',
+      'Supplier and Contact', 'Price per sqm (Low)', 'Price per sqm (Mid)', 'Price per sqm (High)'
+    ];
     const csvContent = [
       headers.join(','),
       ...materials.map(item => [
         item.code,
+        item.area,
         item.location,
         item.finish,
-        item.supplier,
-        item.contactInfo || '',
+        item.supplierAndContact,
         item.pricePerSqm?.low || '',
         item.pricePerSqm?.mid || '',
         item.pricePerSqm?.high || '',
-        item.type
       ].join(','))
     ].join('\n');
 
@@ -37,7 +39,7 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
 
   const copyToClipboard = () => {
     const text = materials.map(item => 
-      `${item.code} - ${item.location} - ${item.finish} - ${item.supplier} - ${item.type}`
+      `${item.code} - ${item.area} - ${item.location} - ${item.finish} - ${item.supplierAndContact} - Low: £${item.pricePerSqm?.low || '-'} Mid: £${item.pricePerSqm?.mid || '-'} High: £${item.pricePerSqm?.high || '-'}`
     ).join('\n');
     navigator.clipboard.writeText(text);
   };
@@ -93,33 +95,30 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 Code
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                Location
-              </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                Finish
-              </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
-                Supplier
+                Area
               </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">
-                Contact
+                Location of Finish
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
+                Finish
+              </th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[350px]">
+                Supplier and Contact
+              </th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
                 Price (Low)
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
                 Price (Mid)
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
                 Price (High)
               </th>
-            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-              Type
-            </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -129,16 +128,16 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
                   {item.code}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
+                  {item.area}
+                </td>
+                <td className="px-3 py-4 text-sm text-gray-900">
                   {item.location}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
                   {item.finish}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.supplier}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.contactInfo || '-'}
+                  {item.supplierAndContact}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
                   {item.pricePerSqm?.low ? `£${item.pricePerSqm.low}` : '-'}
@@ -149,10 +148,7 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
                 <td className="px-3 py-4 text-sm text-gray-900">
                   {item.pricePerSqm?.high ? `£${item.pricePerSqm.high}` : '-'}
                 </td>
-              <td className="px-3 py-4 text-sm text-gray-900">
-                {item.type}
-              </td>
-            </tr>
+              </tr>
             ))}
           </tbody>
         </table>
