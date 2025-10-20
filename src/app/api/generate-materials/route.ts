@@ -88,35 +88,39 @@ export async function POST(request: NextRequest) {
             {
               type: "text",
               text: `Analyze this image and generate a BIM material schedule. For each material you identify, provide:
-              - Code (format: WD-01, WD-02, etc.)
-              - Location (e.g., Kitchen, Living Room, etc.)
-              - Finish/Grade description
-              - Material type (e.g., Oak, Marble, Tile, etc.)
-              - Estimated price per sqm in pounds (realistic UK market price)
+              - Code (format: WD-XX, MT-XX, GL-XX, CT-XX, ST-XX, PT-XX based on material type)
+              - Area (e.g., Kitchen, Living Room)
+              - Location of finish (e.g., Skirting, Wall, Ceiling, Floor)
+              - Finish (Specific name from a high/mid-grade supplier, incorporating material type)
+              - Supplier and Contact (Recommended high/mid-grade UK supplier with Company Name, Contact Email, and Phone Number)
+              - Estimated price per sqm in pounds (realistic UK market price for high/mid-grade products)
+              - Type (General category like Oak, Marble, Tile, Paint, Upholstery)
               
               IMPORTANT: 
-              - Focus on material identification and realistic UK pricing
-              - Provide realistic price estimates based on UK market rates
-              - Use your knowledge of UK construction material costs
+              - Focus on identifying *all* visible materials in the image (aim for at least 8-10 distinct items).
+              - Ensure codes strictly follow the WD/MT/GL/CT/ST/PT-XX format.
+              - Provide realistic UK market pricing estimates for high or mid-grade products.
+              - Prioritize high or mid-grade suppliers, NOT low-grade products.
+              - Supplier details MUST include Company Name, Contact Email, and Phone Number, combined into a single string.
               
               Return the data as a JSON array of objects with this exact structure:
               [
                 {
                   "code": "WD-01",
-                  "location": "Kitchen",
-                  "finish": "Grade A Oak Flooring",
-                  "supplier": "Travis Perkins",
-                  "contactInfo": "0345 0268 268",
+                  "area": "Kitchen",
+                  "location": "Floor",
+                  "finish": "Prime Grade European Oak Flooring (Product Code: OAK-FLR-01)",
+                  "supplierAndContact": "Junckers UK (sales@junckers.co.uk, 01376 534700)",
                   "pricePerSqm": {
-                    "low": 45,
-                    "mid": 65,
-                    "high": 85
+                    "low": 70,
+                    "mid": 95,
+                    "high": 120
                   },
                   "type": "Oak"
                 }
               ]
               
-              Identify at least 3-5 different materials from the image. Provide realistic UK market pricing estimates.`
+              Identify all visible materials from the image. Provide realistic UK market pricing estimates for high/mid-grade products.`
             },
             {
               type: "image_url",
@@ -173,25 +177,62 @@ export async function POST(request: NextRequest) {
     
     // Add real UK suppliers to each material
     console.log('🔍 Adding real UK suppliers...');
+    const suppliersData = [
+      { name: 'Junckers UK', email: 'sales@junckers.co.uk', contact: '01376 534700' }, // High-end wood
+      { name: 'Porcelanosa', email: 'info@porcelanosa.co.uk', contact: '0333 003 4000' }, // High-end tiles/stone
+      { name: 'Farrow & Ball', email: 'info@farrow-ball.com', contact: '01202 876123' }, // High-end paint/wallpaper
+      { name: 'VitrA Bathrooms', email: 'sales@vitra.co.uk', contact: '01235 750990' }, // Mid-High end sanitaryware
+      { name: 'Amtico', email: 'info@amtico.com', contact: '0116 204 1000' }, // Mid-High end LVT flooring
+      { name: 'Topps Tiles', email: 'customer.service@toppstiles.co.uk', contact: '0800 014 2935' }, // Mid-range tiles
+      { name: 'Graham & Brown', email: 'info@grahambrown.com', contact: '0808 168 3795' }, // Mid-range wallpaper
+      { name: 'Altro', email: 'info@altro.com', contact: '01462 707600' }, // Commercial flooring
+      { name: 'Forbo Flooring', email: 'info@forbo.com', contact: '01773 744121' } // Commercial flooring
+    ];
+    
     const materialsWithSuppliers = materials.map((material: BIMItem, index: number) => {
-      const suppliers = [
-        { name: 'Travis Perkins', contact: '0345 0268 268' },
-        { name: 'Jewson', contact: '0800 539 766' },
-        { name: 'Wickes', contact: '0330 333 3300' },
-        { name: 'B&Q', contact: '0333 014 3097' },
-        { name: 'Screwfix', contact: '03330 112 112' }
-      ];
+      const assignedSupplier = suppliersData[index % suppliersData.length];
       
-      const supplier = suppliers[index % suppliers.length];
-      
+      // Construct the combined supplier and contact string
+      const supplierAndContactString = 
+        `${assignedSupplier.name} (${assignedSupplier.email}, ${assignedSupplier.contact})`;
+
+      // Determine the code prefix based on material type (if possible, otherwise default)
+      let codePrefix = 'UN'; // Unknown
+      const lowerFinish = material.finish.toLowerCase();
+      if (lowerFinish.includes('wood') || lowerFinish.includes('oak') || lowerFinish.includes('walnut')) codePrefix = 'WD';
+      else if (lowerFinish.includes('metal') || lowerFinish.includes('steel') || lowerFinish.includes('aluminium')) codePrefix = 'MT';
+      else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) codePrefix = 'GL';
+      else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) codePrefix = 'CT';
+      else if (lowerFinish.includes('stone') || lowerFinish.includes('marble') || lowerFinish.includes('granite')) codePrefix = 'ST';
+      else if (lowerFinish.includes('paint') || lowerFinish.includes('wallpaper') || lowerFinish.includes('plaster')) codePrefix = 'PT';
+
+      // Generate a simple sequential code for now
+      const code = `${codePrefix}-${String(index + 1).padStart(2, '0')}`;
+
+      // Attempt to derive type from finish if not already provided by AI
+      let materialType = material.type; // Use AI-provided type if available
+      if (!materialType) {
+        const lowerFinish = material.finish.toLowerCase();
+        if (lowerFinish.includes('oak') || lowerFinish.includes('wood')) materialType = 'Oak';
+        else if (lowerFinish.includes('marble') || lowerFinish.includes('stone')) materialType = 'Marble';
+        else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) materialType = 'Tile';
+        else if (lowerFinish.includes('paint') || lowerFinish.includes('plaster')) materialType = 'Paint';
+        else if (lowerFinish.includes('velvet') || lowerFinish.includes('upholstery')) materialType = 'Upholstery';
+        else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) materialType = 'Glass';
+        else if (lowerFinish.includes('metal') || lowerFinish.includes('steel')) materialType = 'Metal';
+        else materialType = 'Other'; // Default if no clear type is derived
+      }
+
       return {
         ...material,
-        supplier: supplier.name,
-        contactInfo: supplier.contact,
+        code: code, // Override with generated code
+        supplierAndContact: supplierAndContactString, // Override with combined string
+        type: materialType, // Ensure type is present
+        // Ensure pricePerSqm exists and has rounded values
         pricePerSqm: {
-          low: Math.round(material.pricePerSqm?.low || 30),
-          mid: Math.round(material.pricePerSqm?.mid || 50),
-          high: Math.round(material.pricePerSqm?.high || 80)
+          low: Math.round(material.pricePerSqm?.low || 50), // Default to higher prices
+          mid: Math.round(material.pricePerSqm?.mid || 80),
+          high: Math.round(material.pricePerSqm?.high || 110)
         }
       };
     });

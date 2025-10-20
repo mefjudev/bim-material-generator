@@ -12,7 +12,7 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
   const exportToCSV = () => {
     const headers = [
       'Code', 'Area', 'Location of Finish', 'Finish',
-      'Supplier and Contact', 'Price per sqm (Low)', 'Price per sqm (Mid)', 'Price per sqm (High)'
+      'Supplier and Contact', 'Price per sqm (Low)', 'Price per sqm (Mid)', 'Price per sqm (High)', 'Type'
     ];
     const csvContent = [
       headers.join(','),
@@ -25,6 +25,7 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
         item.pricePerSqm?.low || '',
         item.pricePerSqm?.mid || '',
         item.pricePerSqm?.high || '',
+        item.type || '',
       ].join(','))
     ].join('\n');
 
@@ -39,7 +40,7 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
 
   const copyToClipboard = () => {
     const text = materials.map(item => 
-      `${item.code} - ${item.area} - ${item.location} - ${item.finish} - ${item.supplierAndContact} - Low: £${item.pricePerSqm?.low || '-'} Mid: £${item.pricePerSqm?.mid || '-'} High: £${item.pricePerSqm?.high || '-'}`
+      `${item.code} - ${item.area} - ${item.location} - ${item.finish} - ${item.supplierAndContact} - Low: £${item.pricePerSqm?.low || '-'} Mid: £${item.pricePerSqm?.mid || '-'} High: £${item.pricePerSqm?.high || '-'} - Type: ${item.type || '-'}`
     ).join('\n');
     navigator.clipboard.writeText(text);
   };
@@ -104,20 +105,23 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">
                 Location of Finish
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[280px]">
                 Finish
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[350px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[320px]">
                 Supplier and Contact
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 Price (Low)
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 Price (Mid)
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 Price (High)
+              </th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                Type
               </th>
             </tr>
           </thead>
@@ -147,6 +151,9 @@ export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) 
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
                   {item.pricePerSqm?.high ? `£${item.pricePerSqm.high}` : '-'}
+                </td>
+                <td className="px-3 py-4 text-sm text-gray-900">
+                  {item.type}
                 </td>
               </tr>
             ))}
