@@ -147,5 +147,9 @@ If you encounter issues:
 
 ## Deployment Status
 - ✅ ESLint errors fixed
-- ✅ TypeScript errors resolved  
+- ✅ TypeScript errors resolved
+- ✅ Client-side image compression implemented
+- ✅ BIM data structure and display updated per client feedback
+- ✅ Table column widths adjusted for better visibility
+- ✅ 'Type' column reintroduced
 - ✅ Ready for production deployment
