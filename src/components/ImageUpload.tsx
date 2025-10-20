@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { compressImage } from '@/utils/imageCompressor';
 
 interface ImageUploadProps {
   onImageSelect: (file: File) => void;
@@ -23,7 +24,7 @@ export default function ImageUpload({ onImageSelect, selectedImage, onRemoveImag
     setIsDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     
@@ -31,14 +32,28 @@ export default function ImageUpload({ onImageSelect, selectedImage, onRemoveImag
     const imageFile = files.find(file => file.type.startsWith('image/'));
     
     if (imageFile) {
-      onImageSelect(imageFile);
+      try {
+        const compressedFile = await compressImage(imageFile);
+        onImageSelect(compressedFile);
+      } catch (error) {
+        console.error("Image compression failed:", error);
+        // Optionally, handle error state or proceed with original file
+        onImageSelect(imageFile);
+      }
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      onImageSelect(file);
+      try {
+        const compressedFile = await compressImage(file);
+        onImageSelect(compressedFile);
+      } catch (error) {
+        console.error("Image compression failed:", error);
+        // Optionally, handle error state or proceed with original file
+        onImageSelect(file);
+      }
     }
   };
 
@@ -58,7 +73,7 @@ export default function ImageUpload({ onImageSelect, selectedImage, onRemoveImag
               {selectedImage.name}
             </p>
             <p className="text-center text-green-600 text-sm">
-              {(selectedImage.size / 1024 / 1024).toFixed(2)} MB
+              {(selectedImage.size / 1024 / 1024).toFixed(2)} MB (Compressed)
             </p>
             <button
               onClick={onRemoveImage}
@@ -80,7 +95,11 @@ export default function ImageUpload({ onImageSelect, selectedImage, onRemoveImag
           onDrop={handleDrop}
           onClick={handleClick}
         >
-          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          {selectedImage && (selectedImage.size > 0) ? (
+            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          ) : (
+            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          )}
           <p className="text-lg font-medium text-gray-700 mb-2">
             Upload an image
           </p>
