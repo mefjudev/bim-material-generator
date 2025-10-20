@@ -6,12 +6,12 @@ export async function POST() {
     
     // Test if we can import OpenAI
     console.log('📦 Testing OpenAI import...');
-    const OpenAI = require('openai');
+    const OpenAI = await import('openai');
     console.log('✅ OpenAI imported successfully');
     
     // Test if we can create OpenAI instance
     console.log('🔑 Testing OpenAI instance creation...');
-    const openai = new OpenAI({
+    const openai = new OpenAI.default({
       apiKey: process.env.OPENAI_API_KEY,
     });
     console.log('✅ OpenAI instance created');

@@ -65,7 +65,7 @@ export class UKSupplierScraper {
     return results;
   }
 
-  private static async scrapeSupplier(supplier: any, material: string): Promise<SupplierData | null> {
+  private static async scrapeSupplier(supplier: { name: string; baseUrl: string; searchUrl: string; contact: string }, material: string): Promise<SupplierData | null> {
     try {
       const searchUrl = `${supplier.searchUrl}${encodeURIComponent(material)}`;
       
