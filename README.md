@@ -1,4 +1,4 @@
-# BIM Material Generator
+# Material Schedule Generator
 
 A web application that analyzes images and generates BIM material schedules using OpenAI's GPT-4 Vision.
 
@@ -6,7 +6,7 @@ A web application that analyzes images and generates BIM material schedules usin
 
 - **Image Upload**: Drag & drop or click to upload images
 - **AI Analysis**: Uses OpenAI GPT-4 Vision to identify materials
-- **BIM Schedule**: Generates structured material data with:
+- **Material Schedule**: Generates structured material data with:
   - Material codes
   - Locations
   - Finish descriptions

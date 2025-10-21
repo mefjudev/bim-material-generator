@@ -3,12 +3,12 @@
 import { BIMItem } from '@/types/bim';
 import { Download, Copy } from 'lucide-react';
 
-interface BIMScheduleProps {
+interface MaterialScheduleProps {
   materials: BIMItem[];
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
-export default function BIMSchedule({ materials, isLoading }: BIMScheduleProps) {
+const MaterialSchedule: React.FC<MaterialScheduleProps> = ({ materials, isLoading }) => {
   const exportToCSV = () => {
     const headers = [
       'Code', 'Area', 'Location of Finish', 'Finish',

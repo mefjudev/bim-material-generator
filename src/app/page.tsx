@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import ImageUpload from '@/components/ImageUpload';
-import BIMSchedule from '@/components/BIMSchedule';
+import MaterialSchedule from '../components/MaterialSchedule';
 import { BIMItem } from '@/types/bim';
 import { Wand2, Loader2 } from 'lucide-react';
 
@@ -77,7 +77,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-[#34544D]">Palette Studio</h1>
-                <h2 className="text-4xl font-bold text-gray-900">BIM Material Generator</h2>
+                <h2 className="text-4xl font-bold text-gray-900">Material Schedule Generator</h2>
               </div>
             </div>
             <p className="text-lg text-gray-600">
@@ -133,9 +133,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* BIM Schedule - Full Width Below */}
+        {/* Material Schedule - Full Width Below */}
         <div className="w-full">
-          <BIMSchedule materials={materials} isLoading={isLoading} />
+          <MaterialSchedule materials={materials} isLoading={isLoading} />
         </div>
 
         {/* Footer */}

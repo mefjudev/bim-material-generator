@@ -52,3 +52,4 @@ export const compressImage = (file: File, maxWidth: number = 1024, maxHeight: nu
     reader.onerror = (error) => reject(error);
   });
 };
+
