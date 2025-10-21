@@ -81,7 +81,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-lg text-gray-600">
-              Upload an image of your space and get a detailed BIM material schedule 
+              Upload an image of your space and get a detailed material schedule 
               with supplier information and pricing.
             </p>
           </div>
