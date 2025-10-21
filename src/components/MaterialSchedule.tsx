@@ -163,3 +163,5 @@ const MaterialSchedule: React.FC<MaterialScheduleProps> = ({ materials, isLoadin
     </div>
   );
 }
+
+export default MaterialSchedule;
