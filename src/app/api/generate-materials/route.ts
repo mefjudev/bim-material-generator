@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
     }, {} as Record<string, (BIMItem & { codePrefix: string })[]>);
 
     // Generate contiguous codes within each group and flatten back to an array
-    let materialsWithContiguousCodes: (BIMItem & { codePrefix: string })[] = [];
+    const materialsWithContiguousCodes: (BIMItem & { codePrefix: string })[] = [];
     for (const prefix in groupedMaterials) {
       if (Object.prototype.hasOwnProperty.call(groupedMaterials, prefix)) {
         const group = groupedMaterials[prefix];
