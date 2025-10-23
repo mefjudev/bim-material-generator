@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Group materials by their derived codePrefix
-    const groupedMaterials = materialsWithPrefixes.reduce((acc, material) => {
+    const groupedMaterials = materialsWithPrefixes.reduce((acc: Record<string, (BIMItem & { codePrefix: string })[]>, material) => {
       (acc[material.codePrefix] = acc[material.codePrefix] || []).push(material);
       return acc;
     }, {} as Record<string, (BIMItem & { codePrefix: string })[]>);
