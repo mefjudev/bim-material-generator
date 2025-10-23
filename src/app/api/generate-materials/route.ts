@@ -175,7 +175,71 @@ export async function POST(request: NextRequest) {
 
     console.log('🎉 Successfully generated materials:', materials.length, 'items');
     
-    // Add real UK suppliers to each material
+    // First, process materials to determine code prefixes and types
+    const materialsWithPrefixes = materials.map((material: BIMItem) => {
+      // Determine the code prefix based on material finish
+      let codePrefix = 'UN'; // Unknown
+      const lowerFinish = material.finish.toLowerCase();
+      if (lowerFinish.includes('wood') || lowerFinish.includes('oak') || lowerFinish.includes('walnut')) codePrefix = 'WD';
+      else if (lowerFinish.includes('metal') || lowerFinish.includes('steel') || lowerFinish.includes('aluminium')) codePrefix = 'MT';
+      else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) codePrefix = 'GL';
+      else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) codePrefix = 'CT';
+      else if (lowerFinish.includes('stone') || lowerFinish.includes('marble') || lowerFinish.includes('granite')) codePrefix = 'ST';
+      else if (lowerFinish.includes('paint') || lowerFinish.includes('wallpaper') || lowerFinish.includes('plaster')) codePrefix = 'PT';
+
+      // Attempt to derive type from finish if not already provided by AI
+      let materialType = material.type; // Use AI-provided type if available
+      if (!materialType) {
+        if (lowerFinish.includes('oak') || lowerFinish.includes('wood')) materialType = 'Oak';
+        else if (lowerFinish.includes('marble') || lowerFinish.includes('stone')) materialType = 'Marble';
+        else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) materialType = 'Tile';
+        else if (lowerFinish.includes('paint') || lowerFinish.includes('plaster')) materialType = 'Paint';
+        else if (lowerFinish.includes('velvet') || lowerFinish.includes('upholstery')) materialType = 'Upholstery';
+        else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) materialType = 'Glass';
+        else if (lowerFinish.includes('metal') || lowerFinish.includes('steel')) materialType = 'Metal';
+        else materialType = 'Other'; // Default if no clear type is derived
+      }
+
+      return {
+        ...material,
+        codePrefix: codePrefix,
+        type: materialType,
+        // Ensure pricePerSqm exists and has rounded values
+        pricePerSqm: {
+          low: Math.round(material.pricePerSqm?.low || 50), // Default to higher prices
+          mid: Math.round(material.pricePerSqm?.mid || 80),
+          high: Math.round(material.pricePerSqm?.high || 110)
+        }
+      };
+    });
+
+    // Group materials by their derived codePrefix
+    const groupedMaterials = materialsWithPrefixes.reduce((acc, material) => {
+      (acc[material.codePrefix] = acc[material.codePrefix] || []).push(material);
+      return acc;
+    }, {} as Record<string, (BIMItem & { codePrefix: string })[]>);
+
+    // Generate contiguous codes within each group and flatten back to an array
+    let materialsWithContiguousCodes: (BIMItem & { codePrefix: string })[] = [];
+    for (const prefix in groupedMaterials) {
+      if (Object.prototype.hasOwnProperty.call(groupedMaterials, prefix)) {
+        const group = groupedMaterials[prefix];
+        group.forEach((material, idx) => {
+          material.code = `${prefix}-${String(idx + 1).padStart(2, '0')}`;
+          materialsWithContiguousCodes.push(material);
+        });
+      }
+    }
+
+    // Sort the final list to maintain the order by prefix and then by code number
+    materialsWithContiguousCodes.sort((a, b) => {
+      if (a.codePrefix < b.codePrefix) return -1;
+      if (a.codePrefix > b.codePrefix) return 1;
+      
+      const getCodeNumber = (code: string) => parseInt(code.split('-')[1], 10);
+      return getCodeNumber(a.code) - getCodeNumber(b.code);
+    });
+
     console.log('🔍 Adding real UK suppliers...');
     const suppliersData = [
       { name: 'Junckers UK', email: 'sales@junckers.co.uk', contact: '01376 534700' }, // High-end wood
@@ -189,51 +253,16 @@ export async function POST(request: NextRequest) {
       { name: 'Forbo Flooring', email: 'info@forbo.com', contact: '01773 744121' } // Commercial flooring
     ];
     
-    const materialsWithSuppliers = materials.map((material: BIMItem, index: number) => {
+    const materialsWithSuppliers = materialsWithContiguousCodes.map((material, index) => {
       const assignedSupplier = suppliersData[index % suppliersData.length];
       
       // Construct the combined supplier and contact string
       const supplierAndContactString = 
         `${assignedSupplier.name} (${assignedSupplier.email}, ${assignedSupplier.contact})`;
 
-      // Determine the code prefix based on material type (if possible, otherwise default)
-      let codePrefix = 'UN'; // Unknown
-      const lowerFinish = material.finish.toLowerCase();
-      if (lowerFinish.includes('wood') || lowerFinish.includes('oak') || lowerFinish.includes('walnut')) codePrefix = 'WD';
-      else if (lowerFinish.includes('metal') || lowerFinish.includes('steel') || lowerFinish.includes('aluminium')) codePrefix = 'MT';
-      else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) codePrefix = 'GL';
-      else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) codePrefix = 'CT';
-      else if (lowerFinish.includes('stone') || lowerFinish.includes('marble') || lowerFinish.includes('granite')) codePrefix = 'ST';
-      else if (lowerFinish.includes('paint') || lowerFinish.includes('wallpaper') || lowerFinish.includes('plaster')) codePrefix = 'PT';
-
-      // Generate a simple sequential code for now
-      const code = `${codePrefix}-${String(index + 1).padStart(2, '0')}`;
-
-      // Attempt to derive type from finish if not already provided by AI
-      let materialType = material.type; // Use AI-provided type if available
-      if (!materialType) {
-        const lowerFinish = material.finish.toLowerCase();
-        if (lowerFinish.includes('oak') || lowerFinish.includes('wood')) materialType = 'Oak';
-        else if (lowerFinish.includes('marble') || lowerFinish.includes('stone')) materialType = 'Marble';
-        else if (lowerFinish.includes('tile') || lowerFinish.includes('ceramic') || lowerFinish.includes('porcelain')) materialType = 'Tile';
-        else if (lowerFinish.includes('paint') || lowerFinish.includes('plaster')) materialType = 'Paint';
-        else if (lowerFinish.includes('velvet') || lowerFinish.includes('upholstery')) materialType = 'Upholstery';
-        else if (lowerFinish.includes('glass') || lowerFinish.includes('mirror')) materialType = 'Glass';
-        else if (lowerFinish.includes('metal') || lowerFinish.includes('steel')) materialType = 'Metal';
-        else materialType = 'Other'; // Default if no clear type is derived
-      }
-
       return {
         ...material,
-        code: code, // Override with generated code
         supplierAndContact: supplierAndContactString, // Override with combined string
-        type: materialType, // Ensure type is present
-        // Ensure pricePerSqm exists and has rounded values
-        pricePerSqm: {
-          low: Math.round(material.pricePerSqm?.low || 50), // Default to higher prices
-          mid: Math.round(material.pricePerSqm?.mid || 80),
-          high: Math.round(material.pricePerSqm?.high || 110)
-        }
       };
     });
     
