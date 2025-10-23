@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
     for (const prefix in groupedMaterials) {
       if (Object.prototype.hasOwnProperty.call(groupedMaterials, prefix)) {
         const group = groupedMaterials[prefix];
-        group.forEach((material, idx) => {
+        group.forEach((material: BIMItem & { codePrefix: string }, idx) => {
           material.code = `${prefix}-${String(idx + 1).padStart(2, '0')}`;
           materialsWithContiguousCodes.push(material);
         });
