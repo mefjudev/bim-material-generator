@@ -102,32 +102,28 @@ const MaterialSchedule: React.FC<MaterialScheduleProps> = ({ materials, isLoadin
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
                 Area
               </th>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                Type
+              </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">
                 Location of Finish
               </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[280px]">
-                Finish
-              </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[320px]">
-                Supplier and Contact
+                Recommended Supplier
               </th>
               <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                Price (Low)
-              </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                Price (Mid)
-              </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                Price (High)
-              </th>
-              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                Type
+                Price
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {materials.map((item, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+            {materials.map((item, index) => {
+              const isStrikethrough = 
+                (item.type === 'Timber' && !['WD-01', 'WD-02', 'WD-03'].includes(item.code)) ||
+                (item.type === 'Ceramic Tiles' && !['CT-01', 'CT-02', 'CT-03'].includes(item.code));
+
+              return (
+                <tr key={index} className={`hover:bg-gray-50 ${isStrikethrough ? 'strikethrough' : ''}`}>
                 <td className="px-3 py-4 text-sm font-medium text-gray-900">
                   {item.code}
                 </td>
@@ -135,33 +131,27 @@ const MaterialSchedule: React.FC<MaterialScheduleProps> = ({ materials, isLoadin
                   {item.area}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.location}
+                  {item.type}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.finish}
+                  {item.location}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
                   {item.supplierAndContact}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.pricePerSqm?.low ? `£${item.pricePerSqm.low}` : '-'}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.pricePerSqm?.mid ? `£${item.pricePerSqm.mid}` : '-'}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.pricePerSqm?.high ? `£${item.pricePerSqm.high}` : '-'}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-900">
-                  {item.type}
+                  <div>Low: {item.pricePerSqm?.low ? `£${item.pricePerSqm.low}` : '-'}</div>
+                  <div>Mid: {item.pricePerSqm?.mid ? `£${item.pricePerSqm.mid}` : '-'}</div>
+                  <div>High: {item.pricePerSqm?.high ? `£${item.pricePerSqm.high}` : '-'}</div>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            )
+          })}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+);
 }
 
 export default MaterialSchedule;

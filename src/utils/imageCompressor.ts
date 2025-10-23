@@ -53,3 +53,4 @@ export const compressImage = (file: File, maxWidth: number = 1024, maxHeight: nu
   });
 };
 
+
